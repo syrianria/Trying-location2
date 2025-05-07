@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تصريح الخروج - المعلمة جملاء</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #fff9e6;
+      font-family: 'Segoe UI', sans-serif;
+      direction: rtl;
+      text-align: center;
+      padding: 30px;
+      color: #444;
+    }
+
+    h1 {
+      color: #b38b00;
+      margin-bottom: 5px;
+    }
+
+    h3 {
+      margin-top: 0;
+      color: #777;
+    }
+
+    .form-container {
+      background-color: #fff3c4;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: linear-gradient(to right, #f2c94c, #f7d774);
+      color: #333;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #e6be41, #f2cc60);
+    }
+
+    .note {
+      font-size: 14px;
+      color: #a67c00;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>مدارس التربية النموذجية - الريان (بنات)</h1>
+  <h3>تصريح عبور مؤقت للطالبات</h3>
+
+  <div class="form-container">
+    <input type="text" id="studentName" placeholder="اسم الطالبة">
+    <button onclick="submitForm()">إرسال</button>
+    <div class="note">عند الضغط سيتم تسجيل وقت الخروج والموقع</div>
+  </div>
+
+  <script>
+    const schoolLatitude = 24.74851;
+    const schoolLongitude = 46.67331;
+    const maxDistance = 2000; // متر (2 كم)
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371000; // متر
+      const toRad = x => x * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    function submitForm() {
+      const name = document.getElementById("studentName").value.trim();
+      if (!name) {
+        alert("الرجاء إدخال اسم الطالبة");
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        alert("الموقع غير مدعوم على هذا الجهاز.");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(position => {
+        const userLat = position.coords.latitude;
+        const userLon = position.coords.longitude;
+
+        const distance = calculateDistance(userLat, userLon, schoolLatitude, schoolLongitude);
+        const isOutside = distance > maxDistance;
+        const status = isOutside ? "خارج المدرسة" : "داخل المدرسة";
+        const now = new Date().toLocaleString("ar-EG");
+
+        if (isOutside) {
+          alert("تحذير: الطالبة خارج نطاق المدرسة!");
+        }
+
+        const record = {
+          اسم_الطالبة: name,
+          وقت_الخروج: now,
+          الحالة: status,
+          المعلمة: "جملاء",
+          المادة: "تقنية",
+          الغرض: "الخروج المؤقت"
+        };
+
+        // تخزين البيانات
+        let records = JSON.parse(localStorage.getItem("studentLogs") || "[]");
+        records.push(record);
+        localStorage.setItem("studentLogs", JSON.stringify(records));
+
+        alert(`تم تسجيل خروج ${name} بنجاح (${status})`);
+        document.getElementById("studentName").value = "";
+
+      }, error => {
+        alert("حدث خطأ في تحديد الموقع");
+      });
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>سجل الخروج - المعلمة جملاء</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #fff9e6;
+      font-family: 'Segoe UI', sans-serif;
+      direction: rtl;
+      text-align: center;
+      padding: 30px;
+      color: #444;
+    }
+
+    h1 {
+      color: #b38b00;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #f7e8b3;
+      color: #555;
+    }
+
+    tr:nth-child(even) {
+      background-color: #fffaf0;
+    }
+
+    .empty {
+      margin-top: 30px;
+      color: #999;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>سجل تصاريح الخروج - المعلمة جملاء</h1>
+
+  <div id="logContainer"></div>
+
+  <script>
+    const logs = JSON.parse(localStorage.getItem("studentLogs") || "[]");
+
+    if (logs.length === 0) {
+      document.getElementById("logContainer").innerHTML = '<div class="empty">لا توجد بيانات مسجلة حتى الآن</div>';
+    } else {
+      let table = `
+        <table>
+          <tr>
+            <th>اسم الطالبة</th>
+            <th>وقت الخروج</th>
+            <th>الموقع</th>
+            <th>المعلمة</th>
+            <th>المادة</th>
+            <th>الغرض</th>
+          </tr>
+      `;
+
+      logs.forEach(log => {
+        table += `
+          <tr>
+            <td>${log.اسم_الطالبة}</td>
+            <td>${log.وقت_الخروج}</td>
+            <td>${log.الحالة}</td>
+            <td>${log.المعلمة}</td>
+            <td>${log.المادة}</td>
+            <td>${log.الغرض}</td>
+          </tr>
+        `;
+      });
+
+      table += '</table>';
+      document.getElementById("logContainer").innerHTML = table;
+    }
+  </script>
+
+</body>
+</html>
